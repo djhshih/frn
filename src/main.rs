@@ -1,4 +1,6 @@
 use clap::{Arg, Command, ArgAction};
+use regex::Regex;
+use std::fs;
 
 fn main() {
     let matches = Command::new("frn")
@@ -13,6 +15,9 @@ fn main() {
                 .action(ArgAction::Append)
                 .help("file(s) to rename")
         )
+        .arg(
+            Arg::new("apply").short('v').action(ArgAction::SetTrue)
+        )
         .get_matches();
 
     let regex = matches.get_one::<String>("regex")
@@ -21,6 +26,8 @@ fn main() {
         .expect("at least one file name is required")
         .map(|v| v.as_str())
         .collect::<Vec<_>>();
+
+    let apply = matches.get_flag("apply");
     
     println!("regex: {}", &regex);
     println!("files: {:?}", &files);
@@ -44,4 +51,43 @@ fn main() {
     println!("pattern: {}", &pattern);
     println!("replacement: {}", &replacement);
     println!("global: {}", global);
+
+    // apply substitution to file names
+    let re = Regex::new(pattern).expect("regex pattern is not valid");
+    let new_names = files.iter().map(|s| {
+        match re.find(s) {
+            None => None,
+            Some(_) => Some(
+                if global {
+                    re.replace_all(s, replacement).into_owned()
+                } else {
+                    re.replace(s, replacement).into_owned()
+                }
+            ),
+        }
+    }).collect::<Vec<_>>();
+    
+    // print the file name substitutions
+    for (x, y) in files.iter().zip(new_names.iter()) {
+        match y {
+            None => {},
+            Some(y) => { println!("{} -> {}", x, y); },
+        }
+    }
+
+    // execute the file rename operations
+    if apply {
+        for (x, y) in files.iter().zip(new_names.iter()) {
+            match y {
+                None => {},
+                Some(y) => { 
+                    match fs::rename(x, y) {
+                        Ok(()) => {},
+                        Err(_) => println!("Warning: could not rename {} -> {}", x, y)
+                    }
+                },
+            }
+        }
+    }
+
 }
