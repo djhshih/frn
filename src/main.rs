@@ -16,7 +16,8 @@ fn main() {
                 .help("file(s) to rename")
         )
         .arg(
-            Arg::new("apply").short('v').action(ArgAction::SetTrue)
+            Arg::new("apply").short('a').long("apply")
+                .action(ArgAction::SetTrue)
         )
         .get_matches();
 
