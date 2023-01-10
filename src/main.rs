@@ -6,7 +6,7 @@ fn main() {
         .about("Rename files using regular expression")
         .arg(
             Arg::new("regex")
-                .help("substitution specified as a regular expression")
+                .help("substitution expression 's/pattern/replacement/'")
         )
         .arg(
             Arg::new("file")
@@ -24,4 +24,24 @@ fn main() {
     
     println!("regex: {}", &regex);
     println!("files: {:?}", &files);
+
+    // parse substitution expression
+    let mut parts = regex.split('/');
+    let keyword = parts.next().expect("regex must formatted as s/pattern/replacement/");
+    assert_eq!(keyword, "s", "substitution command is missing");
+    let pattern = parts.next().expect("pattern is missing in s/pattern/replacement/");
+    let replacement = parts.next().expect("replacement is missing in s/pattern/replacement/");
+    // parse options
+    let global = match parts.next() {
+        None => false,
+        Some("") => false,
+        Some("g") => true,
+        Some(x) => {
+            panic!("option '{}' is not supported", x)
+        }
+    };
+
+    println!("pattern: {}", &pattern);
+    println!("replacement: {}", &replacement);
+    println!("global: {}", global);
 }
