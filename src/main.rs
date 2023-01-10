@@ -30,9 +30,6 @@ fn main() {
 
     let apply = matches.get_flag("apply");
     
-    println!("regex: {}", &regex);
-    println!("files: {:?}", &files);
-
     // parse substitution expression
     let mut parts = regex.split('/');
     let keyword = parts.next().expect("regex must formatted as s/pattern/replacement/");
@@ -54,10 +51,6 @@ fn main() {
     let re_backref = Regex::new(r"\\(\d+)").unwrap();
     let replacement_new: String = re_backref.replace_all(replacement_raw, r"$$1").into();
     let replacement = &replacement_new;
-
-    println!("pattern: {}", pattern);
-    println!("replacement: {}", replacement);
-    println!("global: {}", global);
 
     // apply substitution to file names
     let re = Regex::new(pattern).expect("regex pattern is not valid");
