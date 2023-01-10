@@ -38,7 +38,7 @@ fn main() {
     let keyword = parts.next().expect("regex must formatted as s/pattern/replacement/");
     assert_eq!(keyword, "s", "substitution command is missing");
     let pattern = parts.next().expect("pattern is missing in s/pattern/replacement/");
-    let replacement = parts.next().expect("replacement is missing in s/pattern/replacement/");
+    let replacement_raw = parts.next().expect("replacement is missing in s/pattern/replacement/");
     // parse options
     let global = match parts.next() {
         None => false,
@@ -49,8 +49,14 @@ fn main() {
         }
     };
 
-    println!("pattern: {}", &pattern);
-    println!("replacement: {}", &replacement);
+    // process replacement backferences from \1 to $1
+    // because crate regex uses $ instead of \ for backreference
+    let re_backref = Regex::new(r"\\(\d+)").unwrap();
+    let replacement_new: String = re_backref.replace_all(replacement_raw, r"$$1").into();
+    let replacement = &replacement_new;
+
+    println!("pattern: {}", pattern);
+    println!("replacement: {}", replacement);
     println!("global: {}", global);
 
     // apply substitution to file names
