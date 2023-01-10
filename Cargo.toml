@@ -9,3 +9,7 @@ edition = "2021"
 clap = { version = "4.0", features = ["derive"] }
 regex = "1"
 
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
