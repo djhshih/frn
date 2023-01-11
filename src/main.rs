@@ -84,7 +84,7 @@ fn main() {
     // record history to file
     if apply {
         let mut outf = fs::OpenOptions::new().create(true).append(true).open(history)
-            .expect("could not open history file for appending");
+            .expect("could not open history file for logging");
         for (x, y) in files.iter().zip(new_names.iter()) {
             match y {
                 None => {},
@@ -93,7 +93,7 @@ fn main() {
                         Ok(()) => {
                             println!("{} -> {}", x, y);
                             writeln!(&mut outf, "mv {} {}", x, y)
-                                .expect("failed to write to history");
+                                .expect("failed to log history");
                         },
                         Err(_) => println!("Warning: could not rename {} -> {}", x, y)
                     }
