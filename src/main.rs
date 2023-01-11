@@ -2,7 +2,7 @@ use clap::{Arg, Command, ArgAction, value_parser};
 use regex::Regex;
 use std::fs;
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn main() {
     let matches = Command::new("frn")
@@ -27,6 +27,12 @@ fn main() {
         .arg(
             Arg::new("run").short('r').long("run")
                 .action(ArgAction::SetTrue)
+                .help("run the rename operation (default is dry-run)")
+        )
+        .arg(
+            Arg::new("force").short('f').long("force")
+                .action(ArgAction::SetTrue)
+                .help("allow files to be overwritten")
         )
         .get_matches();
 
@@ -37,11 +43,12 @@ fn main() {
         .map(|v| v.as_str())
         .collect::<Vec<_>>();
 
-    let run = matches.get_flag("run");
-
     let history = matches.get_one::<PathBuf>("history")
         .expect("history file is invalid");
-    
+
+    let run = matches.get_flag("run");
+    let force = matches.get_flag("force");
+
     // parse substitution expression
     let mut parts = regex.split('/');
     let keyword = parts.next().expect("regex must formatted as s/pattern/replacement/");
@@ -79,36 +86,40 @@ fn main() {
         }
     }).collect::<Vec<_>>();
 
-    // print proposed file rename
-    for (x, y) in files.iter().zip(new_names.iter()) {
-        match y {
-            None => {},
-            Some(y) => { 
-                println!("{} -> {}", x, y);
-            }
-        }
-    }
-    
-    // execute the file rename operations
     if run {
+        // execute the file rename operations
         let mut outf = fs::OpenOptions::new().create(true).append(true).open(history)
             .expect("could not open history file for logging");
         for (x, y) in files.iter().zip(new_names.iter()) {
             match y {
                 None => {},
                 Some(y) => { 
-                    match fs::rename(x, y) {
-                        Ok(()) => {
-                            // record history to file
-                            writeln!(&mut outf, "mv {} {}", x, y)
-                                .expect("failed to log history");
-                        },
-                        Err(_) => println!("Warning: could not rename {} -> {}", x, y)
+                    if !Path::new(y).exists() || force {
+                        match fs::rename(x, y) {
+                            Ok(()) => {
+                                println!("{} -> {}", x, y);
+                                // record history to file
+                                writeln!(&mut outf, "mv {} {}", x, y)
+                                    .expect("failed to log history");
+                            },
+                            Err(_) => println!("Warning: could not rename {} -> {}", x, y)
+                        }
+                    } else {
+                        println!("Warning: did not rename {} -> {} because target exists", x, y);
                     }
                 },
             }
         }
     } else {
+        // print proposed file rename
+        for (x, y) in files.iter().zip(new_names.iter()) {
+            match y {
+                None => {},
+                Some(y) => { 
+                    println!("{} -> {}", x, y);
+                }
+            }
+        }
         println!("No operation performed. Confirm by `frn -r`.")
     }
 
