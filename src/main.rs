@@ -1,6 +1,8 @@
-use clap::{Arg, Command, ArgAction};
+use clap::{Arg, Command, ArgAction, value_parser};
 use regex::Regex;
 use std::fs;
+use std::io::prelude::*;
+use std::path::PathBuf;
 
 fn main() {
     let matches = Command::new("frn")
@@ -16,6 +18,13 @@ fn main() {
                 .help("file(s) to rename")
         )
         .arg(
+            Arg::new("history").short('l').long("history")
+                .required(false)
+                .help("file to record history")
+                .default_value(".frn_history")
+                .value_parser(value_parser!(PathBuf))
+        )
+        .arg(
             Arg::new("apply").short('a').long("apply")
                 .action(ArgAction::SetTrue)
         )
@@ -29,6 +38,9 @@ fn main() {
         .collect::<Vec<_>>();
 
     let apply = matches.get_flag("apply");
+
+    let history = matches.get_one::<PathBuf>("history")
+        .expect("history file is invalid");
     
     // parse substitution expression
     let mut parts = regex.split('/');
@@ -67,22 +79,22 @@ fn main() {
         }
     }).collect::<Vec<_>>();
     
-    // print the file name substitutions
-    for (x, y) in files.iter().zip(new_names.iter()) {
-        match y {
-            None => {},
-            Some(y) => { println!("{} -> {}", x, y); },
-        }
-    }
-
     // execute the file rename operations
+    // print the file name substitutions to console
+    // record history to file
     if apply {
+        let mut outf = fs::OpenOptions::new().create(true).append(true).open(history)
+            .expect("could not open history file for appending");
         for (x, y) in files.iter().zip(new_names.iter()) {
             match y {
                 None => {},
                 Some(y) => { 
                     match fs::rename(x, y) {
-                        Ok(()) => {},
+                        Ok(()) => {
+                            println!("{} -> {}", x, y);
+                            writeln!(&mut outf, "mv {} {}", x, y)
+                                .expect("failed to write to history");
+                        },
                         Err(_) => println!("Warning: could not rename {} -> {}", x, y)
                     }
                 },
