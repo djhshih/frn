@@ -61,7 +61,7 @@ fn main() {
         Some("") => false,
         Some("g") => true,
         Some(x) => {
-            panic!("option '{}' is not supported", x)
+            panic!("regex option '{}' is not supported", x)
         }
     };
 
