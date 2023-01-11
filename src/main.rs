@@ -10,29 +10,29 @@ fn main() {
         .about("Rename files using regular expression")
         .arg(
             Arg::new("regex")
-                .help("substitution expression 's/pattern/replacement/g'")
+                .help("Substitution expression 's/pattern/replacement/g'")
         )
         .arg(
             Arg::new("file")
                 .action(ArgAction::Append)
-                .help("file(s) to rename")
+                .help("File(s) to rename")
         )
         .arg(
             Arg::new("history").short('l').long("history")
                 .required(false)
-                .help("file to record history")
+                .help("File to record history")
                 .default_value(".frn_history")
                 .value_parser(value_parser!(PathBuf))
         )
         .arg(
             Arg::new("run").short('r').long("run")
                 .action(ArgAction::SetTrue)
-                .help("run the rename operation (default is dry-run)")
+                .help("Run the rename operation (default is dry-run)")
         )
         .arg(
             Arg::new("force").short('f').long("force")
                 .action(ArgAction::SetTrue)
-                .help("allow files to be overwritten")
+                .help("Allow files to be overwritten")
         )
         .get_matches();
 
