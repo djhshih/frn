@@ -108,6 +108,8 @@ fn main() {
                 },
             }
         }
+    } else {
+        println!("No operation performed. Confirm by `frn -r`.")
     }
 
 }
