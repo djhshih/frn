@@ -25,7 +25,7 @@ fn main() {
                 .value_parser(value_parser!(PathBuf))
         )
         .arg(
-            Arg::new("apply").short('a').long("apply")
+            Arg::new("run").short('r').long("run")
                 .action(ArgAction::SetTrue)
         )
         .get_matches();
@@ -37,7 +37,7 @@ fn main() {
         .map(|v| v.as_str())
         .collect::<Vec<_>>();
 
-    let apply = matches.get_flag("apply");
+    let run = matches.get_flag("run");
 
     let history = matches.get_one::<PathBuf>("history")
         .expect("history file is invalid");
@@ -64,7 +64,7 @@ fn main() {
     let replacement_new: String = re_backref.replace_all(replacement_raw, r"$$1").into();
     let replacement = &replacement_new;
 
-    // apply substitution to file names
+    // run substitution to file names
     let re = Regex::new(pattern).expect("regex pattern is not valid");
     let new_names = files.iter().map(|s| {
         match re.find(s) {
@@ -78,9 +78,19 @@ fn main() {
             ),
         }
     }).collect::<Vec<_>>();
+
+    // print proposed file rename
+    for (x, y) in files.iter().zip(new_names.iter()) {
+        match y {
+            None => {},
+            Some(y) => { 
+                println!("{} -> {}", x, y);
+            }
+        }
+    }
     
     // execute the file rename operations
-    if apply {
+    if run {
         let mut outf = fs::OpenOptions::new().create(true).append(true).open(history)
             .expect("could not open history file for logging");
         for (x, y) in files.iter().zip(new_names.iter()) {
@@ -89,7 +99,6 @@ fn main() {
                 Some(y) => { 
                     match fs::rename(x, y) {
                         Ok(()) => {
-                            println!("{} -> {}", x, y);
                             // record history to file
                             writeln!(&mut outf, "mv {} {}", x, y)
                                 .expect("failed to log history");
