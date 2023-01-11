@@ -10,7 +10,7 @@ fn main() {
         .about("Rename files using regular expression")
         .arg(
             Arg::new("regex")
-                .help("substitution expression 's/pattern/replacement/'")
+                .help("substitution expression 's/pattern/replacement/g'")
         )
         .arg(
             Arg::new("file")
