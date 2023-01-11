@@ -80,8 +80,6 @@ fn main() {
     }).collect::<Vec<_>>();
     
     // execute the file rename operations
-    // print the file name substitutions to console
-    // record history to file
     if apply {
         let mut outf = fs::OpenOptions::new().create(true).append(true).open(history)
             .expect("could not open history file for logging");
@@ -92,6 +90,7 @@ fn main() {
                     match fs::rename(x, y) {
                         Ok(()) => {
                             println!("{} -> {}", x, y);
+                            // record history to file
                             writeln!(&mut outf, "mv {} {}", x, y)
                                 .expect("failed to log history");
                         },
