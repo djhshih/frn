@@ -112,15 +112,19 @@ fn main() {
         }
     } else {
         // print proposed file rename
+        let mut can_rename = false;
         for (x, y) in files.iter().zip(new_names.iter()) {
             match y {
                 None => {},
                 Some(y) => { 
                     println!("{} -> {}", x, y);
+                    can_rename = true;
                 }
             }
         }
-        println!("No operation performed. Confirm by `frn -r`.")
+        if can_rename {
+            println!("No operation performed; confirm by `frn -r`")
+        }
     }
 
 }
