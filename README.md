@@ -46,8 +46,8 @@ apple -> fruits/apple
 banana -> fruits/banana
 orange -> fruits/orange
 ```
-where backreference is done with `$1` (or `\1`).
-Also, notice that we used `|` as the delimiter instead here.
+where `|` is the delimiter, and `-p` creates the parent directory.
+Backreference can be done with `$1` (or `\1`).
 
 Now, all the files are placed within the `fruits` directory.
 
