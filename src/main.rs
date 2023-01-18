@@ -51,12 +51,12 @@ fn main() {
 
     // find second character to use for splitting
     let split_char = regex.chars().nth(1)
-        .expect("regex must be formatted as s/pattern/replacement/");
+        .expect("regex should be formatted as s/pattern/replacement/");
 
     // parse substitution expression
     let mut parts = regex.split(split_char);
-    let keyword = parts.next().expect("regex must be formatted as s/pattern/replacement/");
-    assert_eq!(keyword, "s", "substitution command is missing");
+    let keyword = parts.next().expect("regex should be formatted as s/pattern/replacement/");
+    assert_eq!(keyword, "s", "substitution command (s) is missing");
     let pattern = parts.next().expect("pattern is missing in s/pattern/replacement/");
     let replacement_raw = parts.next().expect("replacement is missing in s/pattern/replacement/");
     // parse options
