@@ -49,9 +49,13 @@ fn main() {
     let run = matches.get_flag("run");
     let force = matches.get_flag("force");
 
+    // find second character to use for splitting
+    let split_char = regex.chars().nth(1)
+        .expect("regex must be formatted as s/pattern/replacement/");
+
     // parse substitution expression
-    let mut parts = regex.split('/');
-    let keyword = parts.next().expect("regex must formatted as s/pattern/replacement/");
+    let mut parts = regex.split(split_char);
+    let keyword = parts.next().expect("regex must be formatted as s/pattern/replacement/");
     assert_eq!(keyword, "s", "substitution command is missing");
     let pattern = parts.next().expect("pattern is missing in s/pattern/replacement/");
     let replacement_raw = parts.next().expect("replacement is missing in s/pattern/replacement/");
